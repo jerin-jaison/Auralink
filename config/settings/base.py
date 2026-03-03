@@ -261,12 +261,7 @@ if STORAGE_TYPE == 's3':
     AWS_DEFAULT_ACL = 'private'
     AWS_QUERYSTRING_EXPIRE = 3600  # 1 hour
 
-# Twilio Settings
-TWILIO_ACCOUNT_SID = config('TWILIO_ACCOUNT_SID', default='')
-TWILIO_AUTH_TOKEN = config('TWILIO_AUTH_TOKEN', default='')
-TWILIO_API_KEY_SID = config('TWILIO_API_KEY_SID', default='')
-TWILIO_API_KEY_SECRET = config('TWILIO_API_KEY_SECRET', default='')
-TWILIO_VERIFY_SERVICE_SID = config('TWILIO_VERIFY_SERVICE_SID', default='')
+# Twilio / OTP settings removed
 
 # Logging Configuration
 LOGGING = {
