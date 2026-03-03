@@ -206,8 +206,9 @@ CACHES = {
 }
 
 # Session Configuration
-SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
-SESSION_CACHE_ALIAS = 'default'
+# Using db-backed sessions to avoid Redis being a hard requirement for login.
+# Redis cache is still used for caching when REDIS_URL is set.
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = 'Lax'
 SESSION_COOKIE_AGE = 1209600  # 2 weeks
