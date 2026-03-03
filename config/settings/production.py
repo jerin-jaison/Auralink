@@ -12,7 +12,8 @@ import os
 # Security
 DEBUG = False
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='*').split(',')
+# Allow all hosts if not specified, but strip whitespace and filter empty strings
+ALLOWED_HOSTS = [h.strip() for h in config('ALLOWED_HOSTS', default='*').split(',') if h.strip()]
 
 # HTTPS and Security Headers
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
@@ -26,10 +27,14 @@ SECURE_HSTS_SECONDS = 31536000  # 1 year
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True
 
-# CORS (restrict to specific origins in production)
+# CORS settings
 CORS_ALLOW_ALL_ORIGINS = config('CORS_ALLOW_ALL_ORIGINS', default=False, cast=bool)
-if not CORS_ALLOW_ALL_ORIGINS:
-    CORS_ALLOWED_ORIGINS = config('CORS_ORIGINS', default='').split(',')
+CORS_ORIGINS_STR = config('CORS_ORIGINS', default='')
+if CORS_ORIGINS_STR:
+    CORS_ALLOWED_ORIGINS = [o.strip() for o in CORS_ORIGINS_STR.split(',') if o.strip()]
+else:
+    CORS_ALLOWED_ORIGINS = []
+
 CORS_ALLOW_CREDENTIALS = True
 
 # Database
