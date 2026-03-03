@@ -312,7 +312,10 @@ LOGGING = {
 }
 
 # Create logs directory if it doesn't exist
-os.makedirs(BASE_DIR / 'logs', exist_ok=True)
+try:
+    os.makedirs(BASE_DIR / 'logs', exist_ok=True)
+except Exception:
+    pass
 
 # Rate Limiting
 RATELIMIT_ENABLE = True
