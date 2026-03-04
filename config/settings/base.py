@@ -256,12 +256,17 @@ VIDEO_CONSTRAINTS = {
 STORAGE_TYPE = config('STORAGE_TYPE', default='local')
 
 if STORAGE_TYPE == 's3':
-    # AWS S3 Settings
+    # S3-compatible Storage Settings
+    # Works with AWS S3, Cloudflare R2, Backblaze B2, DigitalOcean Spaces, Wasabi, etc.
     AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID', default='')
     AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY', default='')
     AWS_STORAGE_BUCKET_NAME = config('AWS_STORAGE_BUCKET_NAME', default='')
     AWS_S3_REGION_NAME = config('AWS_S3_REGION_NAME', default='us-east-1')
-    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+    # For non-AWS providers (R2, B2, Spaces), set this to the provider's endpoint.
+    # Leave unset (or empty) to use native AWS S3.
+    _s3_endpoint = config('AWS_S3_ENDPOINT_URL', default='')
+    if _s3_endpoint:
+        AWS_S3_ENDPOINT_URL = _s3_endpoint
     AWS_S3_FILE_OVERWRITE = False
     AWS_DEFAULT_ACL = 'private'
     AWS_QUERYSTRING_EXPIRE = 3600  # 1 hour
