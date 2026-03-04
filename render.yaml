@@ -23,9 +23,14 @@ services:
       - key: STORAGE_TYPE
         value: local
       - key: REDIS_URL
-        sync: false # Set this in Dashboard if using external Redis
+        sync: false # Set this in Dashboard if using a paid Redis service
+      # Celery broker: falls back to the Postgres DB if REDIS_URL is not set.
+      # This lets the web process dispatch tasks without a separate Redis instance.
+      # If you add a Redis service, override CELERY_BROKER_URL with the redis:// URL.
+      - key: CELERY_BROKER_URL
+        sync: false # Set in Dashboard, e.g. redis://<host>:<port>/0
 
-  # Celery Worker
+  # Celery Worker (only useful when CELERY_BROKER_URL / REDIS_URL is configured)
   - type: worker
     name: auralink-worker
     env: python
@@ -38,6 +43,8 @@ services:
         fromDatabase:
           name: auralink-db
           property: connectionString
+      - key: CELERY_BROKER_URL
+        sync: false # Must match the web service
 
 databases:
   - name: auralink-db

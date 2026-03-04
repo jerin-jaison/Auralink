@@ -18,8 +18,11 @@ from .storage import VideoStorage
 from apps.accounts.permissions import IsActiveUser, CanAccessVideo, CanUploadVideo
 from apps.tasks.video_tasks import process_video_metadata
 
+import logging
 import os
 import uuid
+
+logger = logging.getLogger(__name__)
 
 
 class VideoViewSet(viewsets.ModelViewSet):
@@ -83,19 +86,29 @@ class VideoViewSet(viewsets.ModelViewSet):
                     file_size=video_file.size,
                     format=file_ext
                 )
-                
-                # Trigger background task for metadata extraction
-                # If this fails (e.g. broker down), transaction rolls back
+            
+            # ----------------------------------------------------------------
+            # Dispatch background metadata task OUTSIDE the transaction so that
+            # a Redis/Celery connection failure (e.g. on Render free tier where
+            # no broker is provisioned) does NOT roll back the video record.
+            # Metadata extraction is non-critical; the upload must still succeed.
+            # ----------------------------------------------------------------
+            try:
                 process_video_metadata.delay(str(video.id))
-                
-                return Response(
-                    VideoSerializer(video).data,
-                    status=status.HTTP_201_CREATED
+            except Exception as celery_exc:
+                logger.warning(
+                    "Could not dispatch process_video_metadata task for video %s: %s",
+                    video.id,
+                    celery_exc,
                 )
+            
+            return Response(
+                VideoSerializer(video).data,
+                status=status.HTTP_201_CREATED
+            )
         
         except Exception as e:
-            # Delete file if we saved it locally or on cloud but DB failed
-            # Note: Ideally this should be more robust, but for now we focus on DB integrity
+            logger.exception("Video upload failed: %s", e)
             return Response({
                 'error': str(e)
             }, status=status.HTTP_400_BAD_REQUEST)

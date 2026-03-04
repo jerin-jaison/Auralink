@@ -223,8 +223,12 @@ EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 # File Upload Settings
-FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
-DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
+# Allow up to 500MB to match the premium plan video size limit.
+# DATA_UPLOAD_MAX_MEMORY_SIZE caps the entire POST request body; it must be at
+# least as large as the biggest file we accept, otherwise Django raises
+# RequestDataTooBig before the view even runs.
+FILE_UPLOAD_MAX_MEMORY_SIZE = 500 * 1024 * 1024  # 500MB
+DATA_UPLOAD_MAX_MEMORY_SIZE = 500 * 1024 * 1024  # 500MB
 
 # Video Constraints by Plan
 VIDEO_CONSTRAINTS = {
